@@ -108,3 +108,38 @@ predicted_labels = [ 0 if score > 0 else 1 if score < 0 else 2 for score in sent
 average_score = sum(sentiment_scores) / len(sentiment_scores)
 print(f"Average Sentiment Score: {average_score}")
 
+"""##GPT"""
+
+import pandas as pd
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+
+# Load the CSV file
+data = pd.read_csv('tweet_10000_combined.csv', names=['tweet'])
+
+# Extract the tweets from the CSV
+tweets = data['tweet'].tolist()
+
+# Load the pre-trained GPT model and tokenizer
+model_name = 'gpt2'
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+tokenizer.add_special_tokens({'pad_token': '[PAD]'})
+model = AutoModelForSequenceClassification.from_pretrained(model_name)
+predicted_classarray = []
+
+# Perform sentiment analysis for each tweet
+for tweet in tweets:
+    # Tokenize the tweet
+    inputs = tokenizer.encode_plus(tweet, return_tensors='pt', padding='longest', truncation=True, max_length=128)
+
+    # Generate sentiment from GPT model
+    if inputs['input_ids'].size()[1] > 0:
+        outputs = model(**inputs)
+        predicted_class = outputs.logits.argmax(dim=1)
+        predicted_classarray.append(predicted_class)
+        # Print the generated sentiment for the tweet
+        print(f"Tweet: {tweet}\nSentiment: {predicted_class.item()}\n")
+
+average_score = sum(predicted_classarray) / len(predicted_classarray)
+average_score = round(average_score.item(), 4)
+print(f"Average Sentiment Score: {average_score}")
+
