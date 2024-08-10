@@ -83,3 +83,28 @@ num_tweets = len(tweets)
 num_batches = (num_tweets - 1) // batch_size + 1
 
 sentiments = []
+
+"""##NLTK Tool Kit"""
+
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+
+nltk.download('vader_lexicon')
+
+# Assuming you have a list of tweets called 'tweets'
+
+analyzer = SentimentIntensityAnalyzer()
+
+sentiment_scores = []
+for tweet in tweets:
+    scores = analyzer.polarity_scores(tweet)
+    sentiment_scores.append(scores['compound'])
+
+from sklearn.metrics import classification_report
+from scipy.stats import pearsonr
+
+correlation = pearsonr(sentiment_scores, predictions_array)
+print("Correlation:", correlation)
+predicted_labels = [ 0 if score > 0 else 1 if score < 0 else 2 for score in sentiment_scores]
+average_score = sum(sentiment_scores) / len(sentiment_scores)
+print(f"Average Sentiment Score: {average_score}")
+
