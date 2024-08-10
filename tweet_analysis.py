@@ -33,3 +33,34 @@ numpy.set_printoptions(threshold=sys.maxsize)
 
 silhouette = silhouette_score(X, predictions)
 print(f"Silhouette Score: {silhouette}")
+
+"""##BERT##
+
+"""
+
+from sklearn.metrics import silhouette_score, calinski_harabasz_score
+!pip install transformers
+!pip install sentencepiece
+
+import pandas as pd
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+
+# Load the CSV file
+data = pd.read_csv('tweet_10000_combined.csv',names=['tweet'])
+
+# Extract the tweets from the CSV
+tweets = data['tweet'].tolist()
+
+# Load the pre-trained DistilBERT model and tokenizer
+model_name = 'distilbert-base-uncased'
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForSequenceClassification.from_pretrained(model_name)
+
+# Set batch size for processing
+batch_size = 16
+
+# Tokenize and perform sentiment analysis in batches
+num_tweets = len(tweets)
+num_batches = (num_tweets - 1) // batch_size + 1
+
+sentiments = []
