@@ -60,6 +60,25 @@ model = AutoModelForSequenceClassification.from_pretrained(model_name)
 batch_size = 16
 
 # Tokenize and perform sentiment analysis in batches
+for i in range(num_batches):
+    start_idx = i * batch_size
+    end_idx = (i + 1) * batch_size
+    batch_tweets = tweets[start_idx:end_idx]
+
+    # Tokenize the batch of tweets
+    tokenized_inputs = tokenizer.batch_encode_plus(batch_tweets, padding=True, truncation=True, return_tensors='pt')
+
+    # Perform sentiment analysis on the batch
+    outputs = model(**tokenized_inputs)
+    predictions = outputs.logits.argmax(dim=1)
+
+    # Collect the predicted sentiment for each tweet in the batch
+    sentiments.append(predictions)
+
+sentiment_counts = pd.Series(sentiments).value_counts()
+total_tweets = len(sentiments)
+print(sentiments)
+percentage = sentiment_counts / total_tweets * 100
 num_tweets = len(tweets)
 num_batches = (num_tweets - 1) // batch_size + 1
 
